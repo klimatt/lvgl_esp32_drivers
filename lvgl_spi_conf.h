@@ -132,7 +132,7 @@ extern "C" {
 #define SPI_BUS_MAX_TRANSFER_SZ (DISP_BUF_SIZE * 2)
 
 #else
-#define SPI_BUS_MAX_TRANSFER_SZ (DISP_BUF_SIZE * 2)
+#define SPI_BUS_MAX_TRANSFER_SZ (1024 * 2)
 #endif
 
 #if defined (CONFIG_LV_TFT_USE_CUSTOM_SPI_CLK_DIVIDER)
@@ -161,7 +161,7 @@ extern "C" {
 #elif defined (CONFIG_LV_TFT_DISPLAY_CONTROLLER_PCD8544)
 #define SPI_TFT_CLOCK_SPEED_HZ  (4*1000*1000)
 #else
-#define SPI_TFT_CLOCK_SPEED_HZ  (40*1000*1000)
+#define SPI_TFT_CLOCK_SPEED_HZ  (160*1000*1000)
 #endif
 
 #endif

@@ -176,6 +176,21 @@ void disp_spi_remove_device()
     assert(ret==ESP_OK);
 }
 
+/*void disp_spi_transaction(const uint8_t *data, size_t length,
+                          disp_spi_send_flag_t flags, uint8_t *out,
+                          uint64_t addr, uint8_t dummy_bits)
+{
+    esp_err_t ret;
+    spi_transaction_t t;
+    if (length==0) return;             //no need to send anything
+    memset(&t, 0, sizeof(t));       //Zero out the transaction
+    t.length=length*8;                 //Len is in bytes, transaction length is in bits.
+    t.tx_buffer=data;               //Data
+    t.user=(void*)1;                //D/C needs to be set to 1
+    ret=spi_device_queue_trans(spi, &t, 0);  //Transmit!
+    assert(ret==ESP_OK);
+}*/
+
 void disp_spi_transaction(const uint8_t *data, size_t length,
     disp_spi_send_flag_t flags, uint8_t *out,
     uint64_t addr, uint8_t dummy_bits)
@@ -250,7 +265,7 @@ void disp_spi_transaction(const uint8_t *data, size_t length,
 		disp_wait_for_pending_transactions();	/* before synchronous queueing, all previous pending transactions need to be serviced */
         spi_device_transmit(spi, (spi_transaction_t *) &t);
     } else {
-		
+
 		/* if necessary, ensure we can queue new transactions by servicing some previous transactions */
 		if(uxQueueMessagesWaiting(TransactionPool) == 0) {
 			spi_transaction_t *presult;
@@ -274,12 +289,13 @@ void disp_spi_transaction(const uint8_t *data, size_t length,
 void disp_wait_for_pending_transactions(void)
 {
     spi_transaction_t *presult;
-
+    //ESP_LOGI(TAG, "Start wait for pend transactions");
 	while(uxQueueMessagesWaiting(TransactionPool) < SPI_TRANSACTION_POOL_SIZE) {	/* service until the transaction reuse pool is full again */
         if (spi_device_get_trans_result(spi, &presult, 1) == ESP_OK) {
-			xQueueSend(TransactionPool, &presult, portMAX_DELAY);
+			xQueueSend(TransactionPool, &presult, 0);
         }
     }
+    //ESP_LOGI(TAG, "End wait for pend transactions");
 }
 
 void disp_spi_acquire(void)
